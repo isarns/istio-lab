@@ -1,0 +1,15 @@
+- op: replace 
+  path: /metadata/name 
+  value: app-c 
+- op: replace  
+  path: /spec/selector/matchLabels/app
+  value: app-c 
+- op: replace  
+  path: /spec/template/metadata/labels/app
+  value: app-c
+- op: replace  
+  path: /spec/template/spec/containers/0/name
+  value: app-c 
+- op: replace 
+  path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+  value: app-c-cm

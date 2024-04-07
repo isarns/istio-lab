@@ -1,0 +1,6 @@
+- op: replace 
+  path: /metadata/name 
+  value: app-a
+- op: replace
+  path: /spec/selector/app
+  value: app-a

@@ -1,0 +1,35 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  install-prometheus:
+    desc: Install Prometheus
+    internal: true
+    cmds:
+      - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      - helm install prometheus prometheus-community/prometheus -n monitoring --create-namespace
+      - kubectl wait pods --for=condition=Ready -l app.kubernetes.io/name=prometheus -n monitoring --timeout=120s
+
+  install-grafana:
+    desc: Install Grafana
+    internal: true
+    cmds:
+      - helm repo add grafana https://grafana.github.io/helm-charts
+      - helm install grafana grafana/grafana -n monitoring -f grafana/grafana-values.yaml
+      - kubectl wait pods --for=condition=Ready -l app.kubernetes.io/instance=grafana -n monitoring --timeout=120s
+  
+  install-monitoring:
+    desc: Install Monitoring
+    preconditions: &base-preconditions
+      - sh: kubectl config current-context | grep kind-{{.CLUSTER_NAME}}
+        msg: kubectl context is not set to kind-{{.CLUSTER_NAME}}
+    cmds:
+      - task: install-prometheus
+      - task: install-grafana
+
+  create-gateways:
+    desc: Create Gateways
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl apply -f grafana/gateway.yaml

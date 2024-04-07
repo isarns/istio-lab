@@ -1,0 +1,31 @@
+version: '3'
+
+vars:
+  DOCKER_USERNAME: isarn
+  DOCKER_REPO_PREFIX: istio_circuit_breaker_demo
+
+tasks:
+  buildApps:
+    vars:
+      APPS: appA appB appC
+    cmds:
+      - for: { var: APPS }
+        cmd: |
+          repo=$(echo "{{.DOCKER_USERNAME}}/{{.DOCKER_REPO_PREFIX}}_{{.ITEM}}" | tr '[:upper:]' '[:lower:]')
+          docker build --build-arg APP_DIR={{.ITEM}} --build-arg PORT=8080 -t $repo:latest .
+  
+  pushApps:
+    vars:
+      APPS: appA appB appC
+    deps:
+      - buildApps
+    cmds:
+      - for: { var: APPS }
+        cmd: |
+          repo=$(echo "{{.DOCKER_USERNAME}}/{{.DOCKER_REPO_PREFIX}}_{{.ITEM}}" | tr '[:upper:]' '[:lower:]')
+          docker push $repo:latest
+  
+  deleteImagesForcefully:
+    cmds:
+      - docker images | grep '^{{.DOCKER_USERNAME}}/{{.DOCKER_REPO_PREFIX}}_' | awk '{print $3}' | xargs docker rmi --force
+

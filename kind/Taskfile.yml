@@ -1,0 +1,18 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  create-kind-cluster:
+    preconditions: 
+      - sh: which kind
+        msg: you need to install kind
+    cmds:
+      - kind create cluster --config config.yaml --name {{.CLUSTER_NAME}}
+    desc: Create a kind cluster
+
+    
+  clean:
+    cmds:
+      - kind delete clusters {{.CLUSTER_NAME}}
+    desc: Delete the kind cluster

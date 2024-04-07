@@ -1,0 +1,48 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  install-istio-system:
+    desc: Install Istio
+    internal: true
+    cmds:
+      - helm repo add istio https://istio-release.storage.googleapis.com/charts
+      - helm install istio-base istio/base -n istio-system --create-namespace
+      - helm install istiod istio/istiod -n istio-system --wait
+      - kubectl label ns default istio-injection=enabled --overwrite
+      - kubectl wait pods --for=condition=Ready -l app=istiod -n istio-system
+      - echo -e "\nIstio service mesh is ready"
+  
+  install-istio-gateway:
+    desc: Install Istio Gateway
+    internal: true
+    cmds:
+      - helm install istio-gateway istio/gateway -n istio-system
+      - kubectl patch service istio-gateway -n istio-system --patch-file gateway/patch.yaml
+      - kubectl wait pods --for=condition=Ready -l app=istiod -n istio-system --timeout=60s
+  
+
+  install-istio-kiali:
+    desc: Install Istio Kiali
+    internal: true
+    cmds:
+      - helm install kiali-server kiali-server --repo https://kiali.org/helm-charts --set auth.strategy="anonymous" --set external_services.prometheus.url="http://prometheus-server.monitoring" -n istio-system
+  
+  create-istio:
+    desc: Create Istio
+    preconditions: &base-preconditions
+      - sh: kubectl config current-context | grep kind-{{.CLUSTER_NAME}}
+        msg: kubectl context is not set to kind-{{.CLUSTER_NAME}}
+    cmds:
+      - task: install-istio-system
+      - task: install-istio-gateway
+      - task: install-istio-kiali
+  
+  create-gateways:
+    desc: Create Gateways
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl apply -f kiali/gateway.yaml
+
+

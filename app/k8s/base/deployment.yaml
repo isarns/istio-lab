@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-placeholder
+spec:
+  selector:
+    matchLabels:
+      app: app-placeholder
+  template:
+    metadata:
+      labels:
+        app: app-placeholder
+    spec:
+      containers:
+        - name: app-placeholder
+          image: change:image
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /test
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 60
+          livenessProbe:
+            httpGet:
+              path: /test
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 60
+          envFrom:
+            - configMapRef:
+                name: app-cm
+

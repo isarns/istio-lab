@@ -1,0 +1,6 @@
+- op: replace 
+  path: /metadata/name 
+  value: app-c-hpa
+- op: replace  
+  path: /spec/scaleTargetRef/name
+  value: app-c

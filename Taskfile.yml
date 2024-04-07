@@ -1,0 +1,62 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  CLUSTER_NAME: "cb-cluster"
+
+includes:
+  cluster:
+    taskfile: kind/Taskfile.yml
+    dir: kind
+    internal: true
+  
+  monitoring:
+    taskfile: monitoring/Taskfile.yml
+    dir : monitoring
+    internal: true
+  
+  istio:
+    taskfile: istio/Taskfile.yml
+    dir: istio
+    internal: true
+  
+
+tasks:
+  create-gateways:
+    desc: Create Gateways
+    internal: true
+    cmds:
+      - task: monitoring:create-gateways
+      - task: istio:create-gateways
+
+  messages:
+    desc: Show the messages
+    internal: true
+    silent: true
+    cmds:
+      - echo -e "\n \n add 127.0.0.1 kiali.local to /etc/hosts"
+      - echo -e "\n \n add 127.0.0.1 grafana.local to /etc/hosts"
+      - echo -e "\n \n add 127.0.0.1 myserver.local to /etc/hosts"
+
+  create:
+    desc: Create a kind cluster
+    cmds:
+      - task: cluster:create-kind-cluster
+      - task: monitoring:install-monitoring
+      - task: istio:create-istio
+      - task: create-gateways
+      - task: messages
+  
+  client-logs:
+    desc: Show the client logs
+    cmds:
+      - kubectl logs -l app=app-a -c client -f 
+  
+  clean:
+    desc: Delete the kind cluster
+    cmds:
+      - task: cluster:clean
+
+      
+    
