@@ -29,6 +29,3 @@ patches:
   target:
     kind: Service
     name: app-placeholder-service
-
-
-namespace: apps

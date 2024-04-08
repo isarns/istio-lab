@@ -9,6 +9,7 @@ tasks:
         msg: you need to install kind
     cmds:
       - kind create cluster --config config.yaml --name {{.CLUSTER_NAME}}
+      - kubectl create ns {{.APP_NAMESPACE}}
     desc: Create a kind cluster
 
     

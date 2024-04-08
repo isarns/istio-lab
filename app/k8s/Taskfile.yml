@@ -1,0 +1,13 @@
+version: '3'
+
+vars:
+  APP_NAMESPACE: "apps"
+
+tasks:
+  deployApps:
+    preconditions: &base-preconditions
+        - sh: kubectl config current-context | grep kind-{{.CLUSTER_NAME}}
+          msg: kubectl context is not set to kind-{{.CLUSTER_NAME}}
+    cmds:
+      - kubectl -n {{.APP_NAMESPACE}} apply -k live
+

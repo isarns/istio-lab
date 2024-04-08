@@ -31,4 +31,4 @@ spec:
     - destination:
         port:
           number: 8080
-        host: app-a-service.apps.svc.cluster.local
+        host: app-a

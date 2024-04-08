@@ -27,7 +27,7 @@ func scenarioA(w http.ResponseWriter, req *http.Request) {
 
 func scenarioB(config config) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		makeGetRequest("http://127.0.0.1:" + config.port + "/talkingToMyself")
+		makeGetRequest(config.serviceBUrl + "/talkingToMyself")
 	}
 }
 

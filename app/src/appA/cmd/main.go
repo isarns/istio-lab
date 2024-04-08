@@ -11,10 +11,12 @@ import (
 	"time"
 )
 
+var initialNumOfGoRoutines int
+
 func isScenarioRunning() bool {
-	numOfGoRoutine := runtime.NumGoroutine()
-	log.Println("running GoRoutine:", numOfGoRoutine)
-	return numOfGoRoutine > 3
+	numOfGoRoutines := runtime.NumGoroutine()
+	log.Println("running GoRoutine:", numOfGoRoutines)
+	return numOfGoRoutines > initialNumOfGoRoutines
 }
 
 func scenario(stopChannel chan bool, config config, path string) http.HandlerFunc {
@@ -111,8 +113,11 @@ func main() {
 	http.HandleFunc("/scenarioC", scenario(stopChannel, config, "/scenarioC"))
 	http.HandleFunc("/stop", stopScenario(stopChannel))
 	http.HandleFunc("/test", test)
+	initialNumOfGoRoutines = runtime.NumGoroutine() + 2 
+	fmt.Println("Initial number of go routines:", initialNumOfGoRoutines)
 	err := http.ListenAndServe(":"+config.port, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+	
 }

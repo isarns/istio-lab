@@ -10,6 +10,7 @@ spec:
     metadata:
       labels:
         app: app-placeholder
+        version: v1
     spec:
       containers:
         - name: app-placeholder
