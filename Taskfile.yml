@@ -34,10 +34,11 @@ tasks:
     desc: Show the messages
     internal: true
     silent: true
+    vars:
+      APPS: app-a kiali grafana 
     cmds:
-      - echo -e "\n \n add 127.0.0.1 kiali.local to /etc/hosts"
-      - echo -e "\n \n add 127.0.0.1 grafana.local to /etc/hosts"
-      - echo -e "\n \n add 127.0.0.1 myserver.local to /etc/hosts"
+      for: { var: APPS }
+      cmd: echo -e "\n \n add 1270.0.0.1 {{.ITEM}}.local to /etc/hosts"
 
   create:
     desc: Create a kind cluster
