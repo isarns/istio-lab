@@ -10,4 +10,9 @@ tasks:
           msg: kubectl context is not set to kind-{{.CLUSTER_NAME}}
     cmds:
       - kubectl -n {{.APP_NAMESPACE}} apply -k live
+    
+  restartApp:
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl -n {{.APP_NAMESPACE}} rollout restart deployment
 

@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app-b-vs
+spec:
+  hosts:
+  - "app-b.local"
+  gateways:
+  - apps-gateway
+  http:
+  - name: 'app-b'
+    match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 8080
+        host: app-b
+    # timeout: 1s # Possible way to kill long running requests
