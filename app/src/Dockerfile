@@ -5,10 +5,13 @@ ARG PORT
 
 WORKDIR /opt
 
+COPY utils ../utils
 COPY ${APP_DIR}/go.mod ./
+
 RUN go mod download
 
 COPY ${APP_DIR}/cmd/*.go ./
+
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app
 

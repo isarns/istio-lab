@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/isarns/IstioCircuitBreaker/utils"
 	"log"
-	"os"
 	"strconv"
-	"strings"
 )
 
 type config struct {
@@ -15,10 +14,10 @@ type config struct {
 }
 
 func initConfig() config {
-	port := getEnv("PORT", "9090")
-	timeToRun := fromStringToIntArray(getEnv("TIME_TO_RUN", "00,30"))
-	serviceBUrl := getEnv("SERVICE_B_URL", "http://127.0.0.1:9080")
-	requestCount, err := strconv.Atoi(getEnv("REQUEST_COUNT", "20"))
+	port := utils.GetEnv("PORT", "9090")
+	timeToRun := utils.FromStringToIntArray(utils.GetEnv("TIME_TO_RUN", "00,10,20,30,40,50"))
+	serviceBUrl := utils.GetEnv("SERVICE_B_URL", "http://127.0.0.1:9080")
+	requestCount, err := strconv.Atoi(utils.GetEnv("REQUEST_COUNT", "20"))
 	if err != nil {
 		requestCount = 20
 		log.Println("could not convert REQUEST_COUNT to int will use 20 as default")
@@ -30,23 +29,4 @@ func initConfig() config {
 		serviceBUrl:  serviceBUrl,
 	}
 	return config
-}
-
-func fromStringToIntArray(s string) []int {
-	var result []int
-	for _, v := range strings.Split(s, ",") {
-		s, err := strconv.Atoi(v)
-		if err != nil {
-			log.Panic("cant convert", v, "to string.")
-		}
-		result = append(result, s)
-	}
-	return result
-}
-
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
 }

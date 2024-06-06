@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/isarns/IstioCircuitBreaker/utils"
 	"log"
-	"os"
 	"strconv"
 )
 
@@ -12,8 +12,8 @@ type config struct {
 }
 
 func initConfig() config {
-	port := getEnv("PORT", "9070")
-	timeToSleep, err := strconv.Atoi(getEnv("TIME_TO_SLEEP", "10"))
+	port := utils.GetEnv("PORT", "9070")
+	timeToSleep, err := strconv.Atoi(utils.GetEnv("TIME_TO_SLEEP", "10"))
 	if err != nil {
 		timeToSleep = 10
 		log.Println("could not convert TIME_TO_SLEEP to int will use 10 as default")
@@ -23,11 +23,4 @@ func initConfig() config {
 		timeToSleep: timeToSleep,
 	}
 	return config
-}
-
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
 }

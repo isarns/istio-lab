@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
 	"runtime"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -74,34 +76,56 @@ func ProcessData(url string, timeToRun []int, requestCount int, stopChannel chan
 
 			fmt.Println("------Start-------")
 			wg := sync.WaitGroup{}
+			statusCodeCounts := make(map[int]int)
+			var mu sync.Mutex
+
 			for i := 0; i < requestCount; i++ {
 				wg.Add(1)
-				go func() {
+				go func(id int) {
 					defer wg.Done()
-					get(url)
-				}()
+					code := post(url, id)
+					mu.Lock()
+					statusCodeCounts[code]++
+					mu.Unlock()
+				}(i)
 			}
 			wg.Wait()
+
+			// log summary only after all get logs are printed
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				fmt.Println("------Summary-------")
+				printSummary(statusCodeCounts)
+			}()
+			wg.Wait()
+
 		}
 	}
 }
 
-func get(url string) {
+func post(url string, id int) int {
+	body := []byte(fmt.Sprintf("{\"id\":\"%d\"}", id))
+	idStr := strconv.Itoa(id)
 	start := time.Now()
-	resp, err := http.Get(url)
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
-		log.Fatalf("Error: %s", err)
-		return
+		log.Fatalf("Error sending POST request to %s: %s", url, err)
 	}
 	defer resp.Body.Close()
+
 	end := time.Now()
 	elapsed := time.Since(start)
+	log.Println("ID: "+ idStr + ", STATUS: " + resp.Status + ", START: " + start.Format("15:04:05") + ", END: " + end.Format("15:04:05") + ", TIME: " + elapsed.String())
 
-	log.Println("STATUS: " + resp.Status + ", START: " + getTime(start) + ", END: " + getTime(end) + ", TIME: " + elapsed.String())
+	return resp.StatusCode
 }
 
-func getTime(t time.Time) string {
-	return strings.Split(t.String(), " ")[1]
+func printSummary(statusCodeCounts map[int]int) {
+	for code, count := range statusCodeCounts {
+		fmt.Printf("Requests that returned %d: %d\n", code, count)
+	}
 }
 
 func main() {
@@ -113,11 +137,11 @@ func main() {
 	http.HandleFunc("/scenarioC", scenario(stopChannel, config, "/scenarioC"))
 	http.HandleFunc("/stop", stopScenario(stopChannel))
 	http.HandleFunc("/test", test)
-	initialNumOfGoRoutines = runtime.NumGoroutine() + 2 
+	initialNumOfGoRoutines = runtime.NumGoroutine() + 2
 	fmt.Println("Initial number of go routines:", initialNumOfGoRoutines)
 	err := http.ListenAndServe(":"+config.port, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 }

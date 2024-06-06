@@ -5,21 +5,9 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/isarns/IstioCircuitBreaker/utils"
 )
-
-func addSleep(next http.HandlerFunc, sleepTime time.Duration) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		time.Sleep(sleepTime)
-		next.ServeHTTP(w, req)
-	}
-}
-
-func addLog(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		log.Println(req.Method, req.URL.Path)
-		next.ServeHTTP(w, req)
-	}
-}
 
 func scenarioA(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "scenarioA\n")
@@ -27,23 +15,14 @@ func scenarioA(w http.ResponseWriter, req *http.Request) {
 
 func scenarioB(config config) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		makeGetRequest(config.serviceBUrl + "/talkingToMyself")
+		utils.MakePostRequest(config.serviceBUrl + "/talkingToMyself", utils.ReadBody(req))
 	}
 }
 
 func scenarioC(config config) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		makeGetRequest(config.serviceCUrl + "/scenarioC")
+		utils.MakePostRequest(config.serviceCUrl + "/scenarioC", utils.ReadBody(req))
 	}
-}
-
-func makeGetRequest(url string) {
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatalf("Error: %s", err)
-		return
-	}
-	defer resp.Body.Close()
 }
 
 func talkingToMyself(w http.ResponseWriter, req *http.Request) {
@@ -64,10 +43,10 @@ func main() {
 	config := initConfig()
 	timeToSleep := time.Duration(config.timeToSleep) * time.Second
 	logDetails(config, "App B")
-	http.HandleFunc("/scenarioA", addLog(addSleep(scenarioA, timeToSleep)))
-	http.HandleFunc("/scenarioB", addLog(scenarioB(config)))
-	http.HandleFunc("/scenarioC", addLog(scenarioC(config)))
-	http.HandleFunc("/talkingToMyself", addLog(addSleep(talkingToMyself, timeToSleep)))
+	http.HandleFunc("/scenarioA", utils.WithAddLog(utils.WithAddSleep(scenarioA, timeToSleep)))
+	http.HandleFunc("/scenarioB", utils.WithAddLog(scenarioB(config)))
+	http.HandleFunc("/scenarioC", utils.WithAddLog(scenarioC(config)))
+	http.HandleFunc("/talkingToMyself", utils.WithAddLog(utils.WithAddSleep(talkingToMyself, timeToSleep)))
 	http.HandleFunc("/test", test)
 	err := http.ListenAndServe(":"+config.port, nil)
 	if err != nil {

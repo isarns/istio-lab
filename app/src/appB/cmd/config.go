@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/isarns/IstioCircuitBreaker/utils"
 	"log"
-	"os"
 	"strconv"
 )
 
@@ -14,13 +14,13 @@ type config struct {
 }
 
 func initConfig() config {
-	port := getEnv("PORT", "9080")
-	serviceBUrl := getEnv("SERVICE_B_URL", "http://127.0.0.1:9080")
-	serviceCUrl := getEnv("SERVICE_C_URL", "http://127.0.0.1:9070")
-	timeToSleep, err := strconv.Atoi(getEnv("TIME_TO_SLEEP", "10"))
+	port := utils.GetEnv("PORT", "9080")
+	serviceBUrl := utils.GetEnv("SERVICE_B_URL", "http://127.0.0.1:9080")
+	serviceCUrl := utils.GetEnv("SERVICE_C_URL", "http://127.0.0.1:9070")
+	timeToSleep, err := strconv.Atoi(utils.GetEnv("TIME_TO_SLEEP", "1"))
 	if err != nil {
 		timeToSleep = 10
-		log.Println("could not convert TIME_TO_SLEEP to int will use 10 as default")
+		log.Println("could not convert TIME_TO_SLEEP to int will use 1 as default")
 	}
 	config := config{
 		port:        port,
@@ -29,11 +29,4 @@ func initConfig() config {
 		serviceCUrl: serviceCUrl,
 	}
 	return config
-}
-
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
 }
