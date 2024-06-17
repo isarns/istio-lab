@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"runtime"
-	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,20 +20,16 @@ func isScenarioRunning() bool {
 	return numOfGoRoutines > initialNumOfGoRoutines
 }
 
-func scenario(stopChannel chan bool, config config, path string) http.HandlerFunc {
+func scenario(config config, path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		log.Println(req.Method, req.RequestURI)
-		if isScenarioRunning() {
-			fmt.Fprintf(w, "Another scenario is running please use the /stop endpoint before running another")
-			return
-		}
+		requestCount, delay := handleParams(req)
 		go ProcessData(
 			config.serviceBUrl+path,
-			config.timeToRun,
-			config.requestCount,
-			stopChannel,
+			requestCount,
+			delay,
 		)
-		fmt.Fprintf(w, "running: "+strings.Split(path, "/")[1])
+		fmt.Fprintf(w, "running scenario %s with requestCount: %d, delay: %s", strings.Split(path, "/")[1], requestCount, delay.String())
 	}
 }
 
@@ -60,53 +55,40 @@ func logDetails(config config, appName string) {
 		"config:", config)
 }
 
-func ProcessData(url string, timeToRun []int, requestCount int, stopChannel chan bool) {
-	for {
-		select {
-		case <-stopChannel:
-			log.Println("Stop go routine")
-			return
-		default:
-			currentTime := time.Now()
+func ProcessData(url string, requestCount int, delay time.Duration) {
+	fmt.Println("------Start-------")
+	wg := sync.WaitGroup{}
+	statusCodeCounts := make(map[int]int)
+	var mu sync.Mutex
 
-			if !slices.Contains(timeToRun, currentTime.Second()) {
-				time.Sleep(1 * time.Second)
-				continue
-			}
-
-			fmt.Println("------Start-------")
-			wg := sync.WaitGroup{}
-			statusCodeCounts := make(map[int]int)
-			var mu sync.Mutex
-
-			for i := 0; i < requestCount; i++ {
-				wg.Add(1)
-				go func(id int) {
-					defer wg.Done()
-					code := post(url, id)
-					mu.Lock()
-					statusCodeCounts[code]++
-					mu.Unlock()
-				}(i)
-			}
-			wg.Wait()
-
-			// log summary only after all get logs are printed
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				fmt.Println("------Summary-------")
-				printSummary(statusCodeCounts)
-			}()
-			wg.Wait()
-
-		}
+	for i := 0; i < requestCount; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			code := post(url, id, delay)
+			mu.Lock()
+			statusCodeCounts[code]++
+			mu.Unlock()
+		}(i)
 	}
+	wg.Wait()
+
+	// log summary only after all get logs are printed
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fmt.Println("------Summary-------")
+		printSummary(statusCodeCounts)
+	}()
+	wg.Wait()
+
 }
 
-func post(url string, id int) int {
+
+func post(url string, id int, delay time.Duration) int {
 	body := []byte(fmt.Sprintf("{\"id\":\"%d\"}", id))
 	idStr := strconv.Itoa(id)
+	time.Sleep(delay * time.Duration(id) )
 	start := time.Now()
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
@@ -128,13 +110,59 @@ func printSummary(statusCodeCounts map[int]int) {
 	}
 }
 
+func handleRequestCountParam(req *http.Request) int {
+	var requestCount int
+	requestCountFromParams := req.URL.Query()["requestCount"]
+	if len(requestCountFromParams) > 0 {
+		tempRequestCount, err := strconv.Atoi(requestCountFromParams[0])
+		if err != nil {
+			log.Println("could not convert requestCount to int will use 20 as default")
+		} 
+		requestCount = tempRequestCount
+	} else {
+		log.Println("requestCount not provided, using default value of 20")
+		requestCount = 20
+	}
+	return requestCount
+
+}
+
+func handleDelayParam(req *http.Request) time.Duration {
+	var delay time.Duration
+	delayFromParams := req.URL.Query()["delay"]
+	if len(delayFromParams) > 0 {
+		delayDuratin, err := time.ParseDuration(delayFromParams[0])
+		if err != nil {
+			log.Println("could not convert delay to time.Duration will use 0s as default")
+			delay = 0 * time.Second
+		}else {
+			delay = delayDuratin
+		}
+	} else {
+		delay = 0 * time.Second
+	}
+	return delay
+}
+
+func handleParams(req *http.Request) (int, time.Duration) {
+	requestCount := handleRequestCountParam(req)
+	delay := handleDelayParam(req)
+	return requestCount, delay
+}
+
+func withParams(w http.ResponseWriter, req *http.Request){
+	requestCount, Delay := handleParams(req)
+	fmt.Fprintf(w, "requestCount: %d, delay: %s", requestCount, Delay.String())
+}
+
 func main() {
 	config := initConfig()
 	stopChannel := make(chan bool)
 	logDetails(config, "App A")
-	http.HandleFunc("/scenarioA", scenario(stopChannel, config, "/scenarioA"))
-	http.HandleFunc("/scenarioB", scenario(stopChannel, config, "/scenarioB"))
-	http.HandleFunc("/scenarioC", scenario(stopChannel, config, "/scenarioC"))
+	http.HandleFunc("/withParams", withParams)
+	http.HandleFunc("/scenarioA", scenario(config, "/scenarioA"))
+	http.HandleFunc("/scenarioB", scenario(config, "/scenarioB"))
+	http.HandleFunc("/scenarioC", scenario(config, "/scenarioC"))
 	http.HandleFunc("/stop", stopScenario(stopChannel))
 	http.HandleFunc("/test", test)
 	initialNumOfGoRoutines = runtime.NumGoroutine() + 2
