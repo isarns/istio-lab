@@ -1,12 +1,23 @@
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: server-destination-rule
+  name: app-b-destination-rule
 spec:
-  host: server.default.svc.cluster.local
+  host: app-b
   trafficPolicy:
     connectionPool:
-      tcp:
-        maxConnections: 15
       http:
-        http2MaxRequests: 1
+        http2MaxRequests: 8
+# ---
+# apiVersion: networking.istio.io/v1beta1
+# kind: VirtualService
+# metadata:
+#   name: app-b-virtual-service
+# spec:
+#   hosts:
+#     - app-b
+#   http:
+#     - timeout: 10s
+#       route:
+#         - destination:
+#             host: app-b

@@ -1,16 +1,16 @@
 apiVersion: networking.istio.io/v1beta1
 kind: Sidecar
 metadata:
-  name: SomeName-sidecar
+  name: app-b-sidecar
 spec:
   workloadSelector:
     labels:
-      app: SomeName
+      app: app-b 
   inboundConnectionPool:
     tcp:
-      maxConnections: 410
-      #connectTimeout: 3s
+      idleTimeout: 1s
+      connectTimeout: 1ms
+      maxConnectionDuration: 1ms
     http:
-      http2MaxRequests: 400
-      #maxRequestsPerConnection: 10
-      
+      http2MaxRequests: 5
+      idleTimeout: 1ms
