@@ -56,7 +56,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheusdatasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -80,13 +80,16 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
-            "spanNulls": false,
+            "showPoints": "always",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -136,7 +139,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheusdatasource"
           },
           "editorMode": "code",
           "expr": "sum(rate(istio_requests_total{response_flags=\"UO\"}[$interval])) by (app, destination_service_name)\n/\nsum(rate(istio_requests_total[$interval])) by (app, destination_service_name)",
@@ -165,7 +168,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheusdatasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -197,8 +200,8 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
-            "spanNulls": false,
+            "showPoints": "always",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -248,7 +251,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheusdatasource"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -268,7 +271,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheusdatasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -297,8 +300,8 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
-            "spanNulls": false,
+            "showPoints": "always",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -348,7 +351,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheusdatasource"
           },
           "editorMode": "code",
           "expr": "sum by (app) (\n  rate(\n    istio_requests_total{\n      reporter=~\"source\",\n      response_code!~\"5.*\",\n      app=\"${sourceApp}\"\n    }[$interval]\n  )\n)\n/\nsum by (app) (\n  rate(\n    istio_requests_total{\n      reporter=~\"source\",\n      app=\"${sourceApp}\"\n    }[$interval]\n  )\n)\n",
@@ -364,7 +367,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheusdatasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -393,8 +396,8 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
-            "spanNulls": false,
+            "showPoints": "always",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -444,7 +447,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheusdatasource"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(\n  0.50,\n  sum by (le, app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          app=~\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)",
@@ -456,7 +459,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheusdatasource"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(\n  0.90,\n  sum by (le, app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          app=~\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)",
@@ -469,7 +472,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheusdatasource"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(\n  0.99,\n  sum by (le, app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          app=~\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)",
@@ -486,7 +489,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheusdatasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -515,8 +518,8 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
-            "spanNulls": false,
+            "showPoints": "always",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -574,6 +577,13 @@
         "y": 15
       },
       "id": 5,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "",
+          "url": "d/d6573991-3511-43b6-8495-ccb70f5a2cbf/pod-info?orgId=1&refresh=1m&var-NS=apps&var-Deployment=${sourceApp}"
+        }
+      ],
       "options": {
         "legend": {
           "calcs": [
@@ -593,7 +603,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheusdatasource"
           },
           "editorMode": "code",
           "expr": "avg(envoy_server_total_connections{app=~\"${sourceApp}\"})",
@@ -616,7 +626,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "prometheusdatasource"
         },
         "definition": "label_values(istio_requests_total,app)",
         "hide": 0,
@@ -706,6 +716,6 @@
   "timezone": "",
   "title": "Istio",
   "uid": "db615e46-f67b-4947-8e64-bd7dcbba865d",
-  "version": 3,
+  "version": 1,
   "weekStart": ""
 }

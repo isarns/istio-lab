@@ -9,15 +9,17 @@ tasks:
     cmds:
       - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
       - helm install prometheus prometheus-community/prometheus -n monitoring --create-namespace
-      - kubectl wait pods --for=condition=Ready -l app.kubernetes.io/name=prometheus -n monitoring --timeout=120s
+      - kubectl wait pods --for=condition=Ready -l app.kubernetes.io/name=prometheus -n monitoring --timeout=300s
 
   install-grafana:
     desc: Install Grafana
-    internal: true
+    # internal: true
     cmds:
-      - helm repo add grafana https://grafana.github.io/helm-charts
-      - helm install grafana grafana/grafana -n monitoring -f grafana/grafana-values.yaml
-      - kubectl wait pods --for=condition=Ready -l app.kubernetes.io/instance=grafana -n monitoring --timeout=120s
+      # - helm repo add grafana https://grafana.github.io/helm-charts
+      # - helm upgrade grafana grafana/grafana -n monitoring -f grafana/grafana-values.yaml
+      - kubectl kustomize grafana --enable-helm | kubectl apply -f -
+      - kubectl -n monitoring delete pod grafana-test
+      - kubectl wait pod --for=condition=Ready -l app.kubernetes.io/instance=grafana -n monitoring --timeout=120s
   
   install-monitoring:
     desc: Install Monitoring
