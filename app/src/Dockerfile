@@ -6,7 +6,7 @@ ARG PORT
 WORKDIR /opt
 
 COPY utils ../utils
-COPY ${APP_DIR}/go.mod ./
+COPY ${APP_DIR} ./
 
 RUN go mod download
 

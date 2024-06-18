@@ -1,0 +1,6 @@
+- op: replace 
+  path: /metadata/name 
+  value: proxy-to-all-hpa
+- op: replace  
+  path: /spec/scaleTargetRef/name
+  value: proxy-to-all

@@ -1,0 +1,6 @@
+- op: replace 
+  path: /metadata/name 
+  value: proxy-to-all
+- op: replace
+  path: /spec/selector/app
+  value: proxy-to-all

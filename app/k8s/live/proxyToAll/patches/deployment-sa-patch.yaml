@@ -1,0 +1,8 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-to-all
+spec:
+  template:
+    spec:
+      serviceAccountName: proxy-service-account

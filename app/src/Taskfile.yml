@@ -7,7 +7,7 @@ vars:
 tasks:
   buildApps:
     vars:
-      APPS: appA appB appC
+      APPS: proxyToAll appA appB appC
     cmds:
       - for: { var: APPS }
         cmd: |
@@ -16,7 +16,7 @@ tasks:
   
   pushApps:
     vars:
-      APPS: appA appB appC
+      APPS: proxyToAll appA appB appC
     deps:
       - buildApps
     cmds:

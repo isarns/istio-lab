@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - appA
-  - appB
-  - appC
-  - proxyToAll
+  - serviceAccount.yaml
+  - role.yaml
+  - roleBinding.yaml

@@ -40,7 +40,7 @@ tasks:
     internal: true
     silent: true
     vars:
-      APPS: app-a kiali grafana 
+      APPS: proxy kiali grafana 
     cmds:
       - for: { var: APPS }
         cmd: echo -e "\n \n add 127.0.0.1 {{.ITEM}}.local to /etc/hosts"
