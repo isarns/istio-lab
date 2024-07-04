@@ -23,14 +23,14 @@ func countForSeconds(sleepTime time.Duration) {
 	}
 }
 
-func WithAddSleep(next http.HandlerFunc, sleepTime time.Duration) http.HandlerFunc {
+func WithSleep(next http.HandlerFunc, sleepTime time.Duration) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		countForSeconds(sleepTime)
 		next.ServeHTTP(w, req)
 	}
 }
 
-func WithAddLog(next http.HandlerFunc) http.HandlerFunc {
+func WithLog(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		bodyBytes := ReadBody(req)
 		log.Println(req.Method, req.URL.Path, formatID(bodyBytes))

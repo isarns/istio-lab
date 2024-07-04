@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/isarns/IstioCircuitBreaker/utils"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/isarns/IstioCircuitBreaker/utils"
 )
 
 func scenarioC(w http.ResponseWriter, req *http.Request) {
@@ -26,7 +27,7 @@ func main() {
 	config := initConfig()
 	timeToSleep := time.Duration(config.timeToSleep) * time.Second
 	logDetails(config, "App C")
-	http.HandleFunc("/scenarioC", utils.WithAddLog(utils.WithAddSleep(scenarioC, timeToSleep)))
+	http.HandleFunc("/scenarioC", utils.WithLog(utils.WithSleep(scenarioC, timeToSleep)))
 	http.HandleFunc("/test", test)
 	err := http.ListenAndServe(":"+config.port, nil)
 	if err != nil {
