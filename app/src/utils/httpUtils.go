@@ -69,9 +69,7 @@ func formatID(bodyBytes []byte) string {
 	var idStruct IDStruct
 	err := json.Unmarshal(bodyBytes, &idStruct)
 	if err != nil {
-		log.Printf("Error parsing JSON: %s", err)
-		log.Panicln("will return None as id")
-		return "NONE"
+		return "id=NONE"
 	}
 	return fmt.Sprintf("id=%s", idStruct.ID)
 }

@@ -6,8 +6,10 @@ spec:
   host: app-b
   trafficPolicy:
     connectionPool:
+      tcp:
+        maxConnections: 10
       http:
-        http2MaxRequests: 8
+        http1MaxPendingRequests: 5
 # ---
 # apiVersion: networking.istio.io/v1beta1
 # kind: VirtualService
