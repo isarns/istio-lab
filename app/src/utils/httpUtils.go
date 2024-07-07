@@ -2,10 +2,12 @@ package utils
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
 	"time"
 )
@@ -14,10 +16,33 @@ type IDStruct struct {
 	ID string `json:"id"`
 }
 
+// generateRandomString creates a random string of a given length.
+// If no length is specified, it defaults to 20.
+func generateRandomString(length ...int) string {
+	l := 20 // Default length
+	if len(length) > 0 {
+		l = length[0]
+	}
+
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, l)
+	for i := range b {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			panic(err) // Handling error by panicking, can be replaced with better error handling
+		}
+		b[i] = charset[n.Int64()]
+	}
+	return string(b)
+}
+
 func countForSeconds(sleepTime time.Duration) {
 	endTime := time.Now().Add(sleepTime)
 	count := 0
+	stringSlice := []string{}
 	for time.Now().Before(endTime) {
+		randomString := generateRandomString()
+		stringSlice = append(stringSlice, randomString)
 		count++
 		time.Sleep(10 * time.Microsecond)
 	}

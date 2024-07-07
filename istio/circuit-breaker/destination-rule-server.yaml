@@ -7,9 +7,9 @@ spec:
   trafficPolicy:
     connectionPool:
       tcp:
-        maxConnections: 10
+        maxConnections: 40
       http:
-        http1MaxPendingRequests: 5
+        http1MaxPendingRequests: 1
 # ---
 # apiVersion: networking.istio.io/v1beta1
 # kind: VirtualService
