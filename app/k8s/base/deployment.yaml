@@ -20,11 +20,10 @@ spec:
             - containerPort: 8080
           resources:
             limits:
-              cpu: 64m
-              memory: 64Mi
+              memory: 256Mi
             requests:
-              cpu: 64m
-              memory: 64Mi
+              cpu: 200m
+              memory: 256Mi
           readinessProbe:
             httpGet:
               path: /test
@@ -37,8 +36,8 @@ spec:
               path: /test
               port: 8080
             initialDelaySeconds: 5
-            periodSeconds: 1
-            timeoutSeconds: 2
+            periodSeconds: 30
+            timeoutSeconds: 60
           envFrom:
             - configMapRef:
                 name: app-cm

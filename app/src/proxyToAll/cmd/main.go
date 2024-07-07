@@ -82,8 +82,7 @@ func proxyToAllAPods(w http.ResponseWriter, r *http.Request, client *kubernetes.
 				responses <- fmt.Sprintf("Error reading response from pod %s: %v\n", podIP, err)
 				return
 			}
-			response := fmt.Sprintf("Response from pod name %s, IP %s:\n%s\n", pod.Name, podIP, body)
-			responses <- response
+			responses <- string(body)
 		}(pod.Status.PodIP)
 	}
 
