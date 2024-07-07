@@ -15,13 +15,13 @@ func scenarioA(w http.ResponseWriter, req *http.Request) {
 
 func scenarioB(config config) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		utils.MakePostRequest(config.serviceBUrl+"/talkingToMyself", utils.ReadBody(req))
+		utils.MakePostRequest(config.serviceBUrl + "/talkingToMyself", utils.ReadBody(req))
 	}
 }
 
 func scenarioC(config config) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		utils.MakePostRequest(config.serviceCUrl+"/scenarioC", utils.ReadBody(req))
+		utils.MakePostRequest(config.serviceCUrl + "/scenarioC", utils.ReadBody(req))
 	}
 }
 
@@ -43,10 +43,10 @@ func main() {
 	config := initConfig()
 	timeToSleep := time.Duration(config.timeToSleep) * time.Second
 	logDetails(config, "App B")
-	http.HandleFunc("/scenarioA", utils.WithLog(utils.WithSleep(scenarioA, timeToSleep)))
-	http.HandleFunc("/scenarioB", utils.WithLog(scenarioB(config)))
-	http.HandleFunc("/scenarioC", utils.WithLog(scenarioC(config)))
-	http.HandleFunc("/talkingToMyself", utils.WithLog(utils.WithSleep(talkingToMyself, timeToSleep)))
+	http.HandleFunc("/scenarioA", utils.WithAddLog(utils.WithAddSleep(scenarioA, timeToSleep)))
+	http.HandleFunc("/scenarioB", utils.WithAddLog(scenarioB(config)))
+	http.HandleFunc("/scenarioC", utils.WithAddLog(scenarioC(config)))
+	http.HandleFunc("/talkingToMyself", utils.WithAddLog(utils.WithAddSleep(talkingToMyself, timeToSleep)))
 	http.HandleFunc("/test", test)
 	err := http.ListenAndServe(":"+config.port, nil)
 	if err != nil {
