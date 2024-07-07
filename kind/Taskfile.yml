@@ -10,6 +10,7 @@ tasks:
     cmds:
       - kind create cluster --config config.yaml --name {{.CLUSTER_NAME}}
       - kubectl create ns {{.APP_NAMESPACE}}
+      - kubectl apply -f https://raw.githubusercontent.com/pythianarora/total-practice/master/sample-kubernetes-code/metrics-server.yaml
     desc: Create a kind cluster
 
     
