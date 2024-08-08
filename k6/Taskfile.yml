@@ -1,0 +1,99 @@
+version: '3'
+
+vars:
+  CLUSTER_NAME: "cluster"
+  K6_NAMESPACE: "default"
+
+tasks:
+  clone-k6-operator:
+    desc: Clone k6 Operator
+    cmds:
+      - git clone https://github.com/grafana/k6-operator || echo already there
+
+  deploy-k6-operator:
+    desc: Deploy k6 Operator
+    dir: k6-operator
+    preconditions: &base-preconditions
+        - sh: kubectl config current-context | grep kind-{{.CLUSTER_NAME}}
+          msg: kubectl context is not set to kind-{{.CLUSTER_NAME}}
+    cmds:
+      - task: clone-k6-operator
+      - make deploy
+  
+  create-config-map-from-file:
+    internal: true
+    desc: Create ConfigMap from file
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl create configmap k6-config --from-file=script.js -n {{.K6_NAMESPACE}}
+  
+  delete-config-map:
+    internal: true
+    desc: Delete ConfigMap
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl delete configmap k6-config -n {{.K6_NAMESPACE}}
+  
+  create-test-run:
+    internal: true
+    desc: Create Test Run
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl apply -f test-run.yaml -n {{.K6_NAMESPACE}}
+  
+  delete-test-run:
+    internal: true
+    desc: Delete Test Run
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl delete -f test-run.yaml -n {{.K6_NAMESPACE}}
+  
+  delete-k6-operator-pod:
+    internal: true
+    desc: Delete k6 Operator Pod
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl delete pod -l app=k6-operator
+  
+  wait-for-k6-operator-pod:
+    internal: true
+    desc: Wait for k6 Operator Pod
+    preconditions: *base-preconditions
+    cmds:
+      - kubectl wait --for=condition=Ready pod -l app=k6-operator
+  
+  logs-from-job:
+    internal: true
+    desc: Show logs from job
+    preconditions: *base-preconditions
+    cmds:
+      - sleep 5
+      - kubectl wait --for=condition=complete --timeout=600s job/run-k6-from-configmap-1 -n {{.K6_NAMESPACE}}
+      - kubectl logs $(kubectl get pods --selector=job-name=run-k6-from-configmap-1 --output=jsonpath='{.items[*].metadata.name}')
+
+  start:
+    desc: Start the k6 test
+    preconditions: *base-preconditions
+    cmds:
+      - task: create-config-map-from-file
+      - task: create-test-run
+      - task: logs-from-job
+  
+  delete:
+    desc: Delete the k6 test
+    preconditions: *base-preconditions
+    cmds:
+      - task: delete-test-run
+      - task: delete-config-map
+
+  reload:
+    desc: Reload the k6 test
+    preconditions: *base-preconditions
+    cmds:
+      - task: delete
+      - task: start
+      - task: logs-from-job
+      
+      
+      
+    

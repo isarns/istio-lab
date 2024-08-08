@@ -1,0 +1,10 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: run-k6-from-configmap
+spec:
+  parallelism: 10
+  script:
+    configMap:
+      name: k6-config
+      file: script.js

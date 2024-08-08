@@ -26,6 +26,11 @@ includes:
     taskfile: app/k8s/Taskfile.yml
     dir: app/k8s
     internal: true
+  
+  k6:
+    taskfile: k6/Taskfile.yml
+    dir: k6
+    internal: true
 
 tasks:
   create-gateways:
@@ -53,6 +58,7 @@ tasks:
       - task: istio:create-istio
       - task: create-gateways
       - task: apps:deployApps
+      - task: k6:deploy-k6-operator
       - task: messages
   
   client-logs:
