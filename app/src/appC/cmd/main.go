@@ -9,8 +9,8 @@ import (
 	"github.com/isarns/IstioCircuitBreaker/utils"
 )
 
-func scenarioC(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "scenarioC\n")
+func work(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "working...\n")
 }
 
 func test(w http.ResponseWriter, req *http.Request) {
@@ -27,7 +27,8 @@ func main() {
 	config := initConfig()
 	timeToSleep := time.Duration(config.timeToSleep) * time.Second
 	logDetails(config, "App C")
-	http.HandleFunc("/scenarioC", utils.WithLog(utils.WithSleep(scenarioC, timeToSleep)))
+	http.HandleFunc("/scenarioC", utils.WithLog(utils.WithSleep(work, timeToSleep)))
+	http.HandleFunc("/scenarioD", utils.WithLog(utils.WithSleep(work, timeToSleep)))
 	http.HandleFunc("/test", test)
 	err := http.ListenAndServe(":"+config.port, nil)
 	if err != nil {
