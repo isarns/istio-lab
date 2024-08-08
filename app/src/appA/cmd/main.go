@@ -20,7 +20,7 @@ func isScenarioRunning() bool {
 	return numOfGoRoutines > initialNumOfGoRoutines
 }
 
-func scenario(config config, baseUrl string, path string) http.HandlerFunc {
+func scenario(baseUrl string, path string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		log.Println(req.Method, req.RequestURI)
 		requestCount, delay := handleParams(req)
@@ -159,10 +159,10 @@ func main() {
 	stopChannel := make(chan bool)
 	logDetails(config, "App A")
 	http.HandleFunc("/withParams", withParams)
-	http.HandleFunc("/scenarioA", scenario(config, config.serviceBUrl, "/scenarioA"))
-	http.HandleFunc("/scenarioB", scenario(config, config.serviceBUrl, "/scenarioB"))
-	http.HandleFunc("/scenarioC", scenario(config, config.serviceBUrl, "/scenarioC"))
-	http.HandleFunc("/scenarioD", scenario(config, config.serviceCUrl, "/scenarioD"))
+	http.HandleFunc("/scenarioA", scenario(config.serviceBUrl, "/scenarioA"))
+	http.HandleFunc("/scenarioB", scenario(config.serviceBUrl, "/scenarioB"))
+	http.HandleFunc("/scenarioC", scenario(config.serviceBUrl, "/scenarioC"))
+	http.HandleFunc("/scenarioD", scenario(config.serviceCUrl, "/scenarioD"))
 	http.HandleFunc("/stop", stopScenario(stopChannel))
 	http.HandleFunc("/test", test)
 	err := http.ListenAndServe(":"+config.port, nil)
