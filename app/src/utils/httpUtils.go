@@ -48,13 +48,21 @@ func MakeGetRequest(url string) {
 	defer resp.Body.Close()
 }
 
-func MakePostRequest(url string, body []byte) {
+func MakePostRequest(url string, body []byte) (int, []byte) {
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		log.Fatalf("Error sending POST request to %s: %s", url, err)
 	}
 	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Error reading response body: %s", err)
+	}
+
+	return resp.StatusCode, respBody
 }
+
 
 func ReadBody(req *http.Request) []byte {
 	body, err := io.ReadAll(req.Body)

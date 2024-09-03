@@ -15,15 +15,20 @@ func scenarioA(w http.ResponseWriter, req *http.Request) {
 
 func scenarioB(config config) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		utils.MakePostRequest(config.serviceBUrl+"/talkingToMyself", utils.ReadBody(req))
+		statusCode, body := utils.MakePostRequest(config.serviceCUrl+"/scenarioC", utils.ReadBody(req))
+		w.WriteHeader(statusCode)
+		w.Write(body)
 	}
 }
 
 func scenarioC(config config) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		utils.MakePostRequest(config.serviceCUrl+"/scenarioC", utils.ReadBody(req))
+		statusCode, body := utils.MakePostRequest(config.serviceCUrl+"/scenarioC", utils.ReadBody(req))
+		w.WriteHeader(statusCode)
+		w.Write(body)
 	}
 }
+
 
 func talkingToMyself(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "Much calculations\n")

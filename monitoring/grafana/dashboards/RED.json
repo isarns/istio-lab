@@ -1,0 +1,652 @@
+{
+   "annotations": {
+      "list": [
+         {
+            "datasource": "Prometheus",
+            "enable": true,
+            "expr": "changes(max(kube_replicaset_created{namespace=\"$namespace\",replicaset=~\"$sourceApp.*\"})[$__interval:])",
+            "iconColor": "green",
+            "matchExact": true,
+            "name": "Deployment",
+            "showLine": true,
+            "step": "1m",
+            "tagKeys": "deployment",
+            "titleFormat": "Deployment"
+         }
+      ]
+   },
+   "description": "RED for istio",
+   "graphTooltip": 1,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+         },
+         "id": 1,
+         "panels": [ ],
+         "title": "common",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "showPoints": "never"
+               },
+               "unit": "percentunit"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 1
+         },
+         "id": 2,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "lastNotNull",
+                  "max"
+               ],
+               "displayMode": "table"
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(istio_requests_total{response_flags=~\"UO|URX\",reporter=\"source\"}[$interval])) by (app,destination_app)\n/\nsum(rate(istio_requests_total{reporter=\"source\"}[$interval])) by (app,destination_app)\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{source_app}} rate limited to {{destination_app}} %"
+            }
+         ],
+         "title": "Rate Limited Apps",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "showPoints": "never"
+               }
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 1
+         },
+         "id": 3,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "lastNotNull",
+                  "max"
+               ],
+               "displayMode": "table"
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "avg(envoy_server_total_connections{app=~\"${sourceApp}\"})\n",
+               "intervalFactor": 2,
+               "legendFormat": "connections"
+            }
+         ],
+         "title": "Envoy Connections",
+         "type": "timeseries"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 9
+         },
+         "id": 4,
+         "panels": [ ],
+         "title": "Incoming ${interval}",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineWidth": 2,
+                  "stacking": {
+                     "mode": "normal"
+                  }
+               },
+               "min": 0,
+               "unit": "reqps"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/active.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.axisPlacement",
+                        "value": "right"
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 10
+         },
+         "id": 5,
+         "options": {
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum by (destination_app)(\n    rate(istio_requests_total{\n        destination_app=\"${sourceApp}\",\n        reporter=\"source\"\n        }[${interval}]\n    )\n) \n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}}"
+            }
+         ],
+         "title": "Rate",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10
+               },
+               "decimals": 3,
+               "unit": "percentunit"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 10
+         },
+         "id": 6,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "lastNotNull",
+                  "max"
+               ],
+               "displayMode": "table"
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum by (destination_app) (\n  rate(\n    istio_requests_total{\n      reporter=\"source\",\n      response_code!~\"5.*\",\n      destination_app=\"${sourceApp}\"\n    }[$interval]\n  )\n  )\n  /\n  sum by (destination_app) (\n    rate(\n      istio_requests_total{\n        reporter=\"source\",\n        destination_app=\"${sourceApp}\"\n      }[$interval]\n    )\n  )\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}}"
+            }
+         ],
+         "title": "Success Rate",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "showPoints": "never"
+               },
+               "unit": "ms"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 10
+         },
+         "id": 7,
+         "maxDataPoints": "100",
+         "options": {
+            "legend": {
+               "calcs": [
+                  "lastNotNull",
+                  "max"
+               ],
+               "displayMode": "table"
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "histogram_quantile(\n  0.50,\n  sum by (le, destination_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          destination_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}} - 50%\n"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "histogram_quantile(\n  0.90,\n  sum by (le, destination_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          destination_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}} - 90%\n"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "histogram_quantile(\n  0.99,\n  sum by (le, destination_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          destination_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}} - 99%\n"
+            }
+         ],
+         "title": "Duration",
+         "type": "timeseries"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 18
+         },
+         "id": 8,
+         "panels": [ ],
+         "title": "Outgoing ${interval}",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineWidth": 2,
+                  "stacking": {
+                     "mode": "normal"
+                  }
+               },
+               "min": 0,
+               "unit": "reqps"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/active.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.axisPlacement",
+                        "value": "right"
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 19
+         },
+         "id": 9,
+         "options": {
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum by (destination_app)(\n    rate(istio_requests_total{\n        source_app=\"${sourceApp}\",\n        reporter=\"source\"\n        }[${interval}]\n    )\n) \n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}}"
+            }
+         ],
+         "title": "Rate",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10
+               },
+               "decimals": 3,
+               "unit": "percentunit"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 19
+         },
+         "id": 10,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "lastNotNull",
+                  "max"
+               ],
+               "displayMode": "table"
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum by (destination_app) (\n  rate(\n    istio_requests_total{\n      reporter=\"source\",\n      response_code!~\"5.*\",\n      source_app=\"${sourceApp}\"\n    }[$interval]\n  )\n  )\n  /\n  sum by (destination_app) (\n    rate(\n      istio_requests_total{\n        reporter=\"source\",\n        source_app=\"${sourceApp}\"\n      }[$interval]\n    )\n  )\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}}"
+            }
+         ],
+         "title": "Success Rate",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "showPoints": "never"
+               },
+               "unit": "ms"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 19
+         },
+         "id": 11,
+         "maxDataPoints": "100",
+         "options": {
+            "legend": {
+               "calcs": [
+                  "lastNotNull",
+                  "max"
+               ],
+               "displayMode": "table"
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.0.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "histogram_quantile(\n  0.50,\n  sum by (le, source_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          source_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}} - 50%\n"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "histogram_quantile(\n  0.90,\n  sum by (le, source_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          source_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}} - 90%\n"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "histogram_quantile(\n  0.99,\n  sum by (le, source_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          source_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
+               "intervalFactor": 2,
+               "legendFormat": "{{destination_app}} - 99%\n"
+            }
+         ],
+         "title": "Duration",
+         "type": "timeseries"
+      }
+   ],
+   "schemaVersion": 39,
+   "tags": [
+      "red-grafonnet"
+   ],
+   "templating": {
+      "list": [
+         {
+            "current": {
+               "selected": false,
+               "text": "Prometheus",
+               "value": "Prometheus"
+            },
+            "multi": false,
+            "name": "datasource",
+            "query": "prometheus",
+            "type": "datasource"
+         },
+         {
+            "current": {
+               "selected": false,
+               "text": "apps",
+               "value": "apps"
+            },
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${datasource}"
+            },
+            "multi": false,
+            "name": "namespace",
+            "query": "label_values(kube_namespace_status_phase, namespace)",
+            "refresh": 2,
+            "type": "query"
+         },
+         {
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${datasource}"
+            },
+            "name": "sourceApp",
+            "query": "label_values(istio_requests_total{namespace=\"$namespace\"}, app)",
+            "refresh": 2,
+            "type": "query"
+         },
+         {
+            "auto": true,
+            "auto_count": "30",
+            "auto_min": "2m",
+            "current": {
+               "selected": false,
+               "text": "auto",
+               "value": "$__auto_interval_interval"
+            },
+            "name": "interval",
+            "options": [
+               {
+                  "selected": true,
+                  "text": "auto",
+                  "value": "$__auto_interval_interval"
+               },
+               {
+                  "selected": false,
+                  "text": "1m",
+                  "value": "1m"
+               },
+               {
+                  "selected": false,
+                  "text": "2m",
+                  "value": "2m"
+               },
+               {
+                  "selected": false,
+                  "text": "5m",
+                  "value": "5m"
+               },
+               {
+                  "selected": false,
+                  "text": "10m",
+                  "value": "10m"
+               },
+               {
+                  "selected": false,
+                  "text": "30m",
+                  "value": "30m"
+               },
+               {
+                  "selected": false,
+                  "text": "1h",
+                  "value": "1h"
+               },
+               {
+                  "selected": false,
+                  "text": "6h",
+                  "value": "6h"
+               },
+               {
+                  "selected": false,
+                  "text": "12h",
+                  "value": "12h"
+               },
+               {
+                  "selected": false,
+                  "text": "1d",
+                  "value": "1d"
+               },
+               {
+                  "selected": false,
+                  "text": "7d",
+                  "value": "7d"
+               },
+               {
+                  "selected": false,
+                  "text": "14d",
+                  "value": "14d"
+               },
+               {
+                  "selected": false,
+                  "text": "30d",
+                  "value": "30d"
+               }
+            ],
+            "query": "1m,2m,5m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+            "type": "interval"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-6h",
+      "to": "now"
+   },
+   "timezone": "browser",
+   "title": "RED-Istio",
+   "uid": "red-istio"
+}

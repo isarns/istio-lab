@@ -5,12 +5,9 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app: app-b 
+      app: app-b
   inboundConnectionPool:
     tcp:
-      idleTimeout: 1s
-      connectTimeout: 1ms
-      maxConnectionDuration: 1ms
+      maxConnections: 10
     http:
-      http2MaxRequests: 5
-      idleTimeout: 1ms
+      http1MaxPendingRequests: 5

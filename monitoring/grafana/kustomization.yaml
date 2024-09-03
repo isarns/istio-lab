@@ -17,5 +17,5 @@ configMapGenerator:
 - name: default-dashboards
   namespace: monitoring
   files:
-    - dashboards/istio.json
     - dashboards/podInfo.json
+    - dashboards/RED.json
