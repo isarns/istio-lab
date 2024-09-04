@@ -6,23 +6,23 @@ local prometheusQuery = grafonnet.query.prometheus;
     prometheusQuery.new(
       'Prometheus',
       |||
-        sum by (destination_app)(
+        sum by (%s)(
             rate(istio_requests_total{
                 %s="${sourceApp}",
                 reporter="source"
                 }[${interval}]
             )
         ) 
-      ||| % [app_label],
+      ||| % [app_label, app_label],
     )
     + prometheusQuery.withIntervalFactor(2)
-    + prometheusQuery.withLegendFormat('{{destination_app}}'),
+    + prometheusQuery.withLegendFormat('{{%s}}' % app_label),
 
   local succsessRate(app_label) =
     prometheusQuery.new(
       'Prometheus',
       |||
-        sum by (destination_app) (
+        sum by (%s) (
           rate(
             istio_requests_total{
               reporter="source",
@@ -32,7 +32,7 @@ local prometheusQuery = grafonnet.query.prometheus;
           )
           )
           /
-          sum by (destination_app) (
+          sum by (%s) (
             rate(
               istio_requests_total{
                 reporter="source",
@@ -40,10 +40,10 @@ local prometheusQuery = grafonnet.query.prometheus;
               }[$interval]
             )
           )
-      ||| % [app_label, app_label],
+      ||| % [app_label, app_label, app_label, app_label],
     )
     + prometheusQuery.withIntervalFactor(2)
-    + prometheusQuery.withLegendFormat('{{destination_app}}'),
+    + prometheusQuery.withLegendFormat('{{%s}}' % app_label),
 
   local duration(app_label) =
     [
@@ -65,8 +65,8 @@ local prometheusQuery = grafonnet.query.prometheus;
       )
       + prometheusQuery.withIntervalFactor(2)
       + prometheusQuery.withLegendFormat(|||
-        {{destination_app}} - %s%%
-      ||| % [quantile])
+        {{%s}} - %s%%
+      ||| % [app_label, quantile])
       for quantile in ['50', '90', '99']
     ],
 
@@ -74,13 +74,13 @@ local prometheusQuery = grafonnet.query.prometheus;
     prometheusQuery.new(
       'Prometheus',
       |||
-        sum(rate(istio_requests_total{response_flags=~"UO|URX",reporter="source"}[$interval])) by (app,destination_app)
+        sum(rate(istio_requests_total{response_flags=~"UO|URX",reporter="source"}[$interval])) by (source_app,destination_service_name)
         /
-        sum(rate(istio_requests_total{reporter="source"}[$interval])) by (app,destination_app)
+        sum(rate(istio_requests_total{reporter="source"}[$interval])) by (source_app,destination_service_name)
       |||
     )
     + prometheusQuery.withIntervalFactor(2)
-    + prometheusQuery.withLegendFormat('{{source_app}} rate limited to {{destination_app}} %'),
+    + prometheusQuery.withLegendFormat('{{source_app}} rate limited to {{destination_service_name}} %'),
 
   envoyConnections:
     prometheusQuery.new(

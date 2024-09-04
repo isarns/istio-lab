@@ -72,9 +72,9 @@
                   "type": "prometheus",
                   "uid": "Prometheus"
                },
-               "expr": "sum(rate(istio_requests_total{response_flags=~\"UO|URX\",reporter=\"source\"}[$interval])) by (app,destination_app)\n/\nsum(rate(istio_requests_total{reporter=\"source\"}[$interval])) by (app,destination_app)\n",
+               "expr": "sum(rate(istio_requests_total{response_flags=~\"UO|URX\",reporter=\"source\"}[$interval])) by (source_app,destination_service_name)\n/\nsum(rate(istio_requests_total{reporter=\"source\"}[$interval])) by (source_app,destination_service_name)\n",
                "intervalFactor": 2,
-               "legendFormat": "{{source_app}} rate limited to {{destination_app}} %"
+               "legendFormat": "{{source_app}} rate limited to {{destination_service_name}} %"
             }
          ],
          "title": "Rate Limited Apps",
@@ -391,9 +391,9 @@
                   "type": "prometheus",
                   "uid": "Prometheus"
                },
-               "expr": "sum by (destination_app)(\n    rate(istio_requests_total{\n        source_app=\"${sourceApp}\",\n        reporter=\"source\"\n        }[${interval}]\n    )\n) \n",
+               "expr": "sum by (source_app)(\n    rate(istio_requests_total{\n        source_app=\"${sourceApp}\",\n        reporter=\"source\"\n        }[${interval}]\n    )\n) \n",
                "intervalFactor": 2,
-               "legendFormat": "{{destination_app}}"
+               "legendFormat": "{{source_app}}"
             }
          ],
          "title": "Rate",
@@ -440,9 +440,9 @@
                   "type": "prometheus",
                   "uid": "Prometheus"
                },
-               "expr": "sum by (destination_app) (\n  rate(\n    istio_requests_total{\n      reporter=\"source\",\n      response_code!~\"5.*\",\n      source_app=\"${sourceApp}\"\n    }[$interval]\n  )\n  )\n  /\n  sum by (destination_app) (\n    rate(\n      istio_requests_total{\n        reporter=\"source\",\n        source_app=\"${sourceApp}\"\n      }[$interval]\n    )\n  )\n",
+               "expr": "sum by (source_app) (\n  rate(\n    istio_requests_total{\n      reporter=\"source\",\n      response_code!~\"5.*\",\n      source_app=\"${sourceApp}\"\n    }[$interval]\n  )\n  )\n  /\n  sum by (source_app) (\n    rate(\n      istio_requests_total{\n        reporter=\"source\",\n        source_app=\"${sourceApp}\"\n      }[$interval]\n    )\n  )\n",
                "intervalFactor": 2,
-               "legendFormat": "{{destination_app}}"
+               "legendFormat": "{{source_app}}"
             }
          ],
          "title": "Success Rate",
@@ -492,7 +492,7 @@
                },
                "expr": "histogram_quantile(\n  0.50,\n  sum by (le, source_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          source_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
                "intervalFactor": 2,
-               "legendFormat": "{{destination_app}} - 50%\n"
+               "legendFormat": "{{source_app}} - 50%\n"
             },
             {
                "datasource": {
@@ -501,7 +501,7 @@
                },
                "expr": "histogram_quantile(\n  0.90,\n  sum by (le, source_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          source_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
                "intervalFactor": 2,
-               "legendFormat": "{{destination_app}} - 90%\n"
+               "legendFormat": "{{source_app}} - 90%\n"
             },
             {
                "datasource": {
@@ -510,7 +510,7 @@
                },
                "expr": "histogram_quantile(\n  0.99,\n  sum by (le, source_app) (\n    rate(\n      istio_request_duration_milliseconds_bucket{\n          reporter=~\"source\",\n          source_app=\"${sourceApp}\",\n      }\n    [$interval])\n  )\n)\n",
                "intervalFactor": 2,
-               "legendFormat": "{{destination_app}} - 99%\n"
+               "legendFormat": "{{source_app}} - 99%\n"
             }
          ],
          "title": "Duration",
