@@ -33,6 +33,18 @@ includes:
     internal: true
 
 tasks:
+  check-tools:
+    desc: "Check if Docker, Kind, and Helm are installed"
+    preconditions:
+      - sh: command -v docker
+        msg: "Docker is not installed. Please install Docker to proceed."
+      - sh: command -v kind
+        msg: "Kind is not installed. Please install Kind to proceed."
+      - sh: command -v helm
+        msg: "Helm is not installed. Please install Helm to proceed."
+    cmds:
+      - echo "All required tools (Docker, Kind, Helm) are installed."
+    
   create-gateways:
     desc: Create Gateways
     internal: true
@@ -52,6 +64,8 @@ tasks:
 
   create:
     desc: Create a kind cluster
+    deps:
+      - check-tools
     cmds:
       - task: cluster:create-kind-cluster
       - task: monitoring:install-monitoring
