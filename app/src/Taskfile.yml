@@ -6,6 +6,7 @@ vars:
 
 tasks:
   buildApps:
+    desc: Build the apps
     vars:
       APPS: proxyToAll appA appB appC
     cmds:
@@ -15,6 +16,7 @@ tasks:
           docker build --build-arg APP_DIR={{.ITEM}} --build-arg PORT=8080 -t $repo:latest .
   
   pushApps:
+    desc: Push the apps to Docker Hub
     vars:
       APPS: proxyToAll appA appB appC
     deps:
@@ -26,6 +28,7 @@ tasks:
           docker push $repo:latest
   
   deleteImagesForcefully:
+    desc: Delete all images forcefully
     cmds:
       - docker images | grep '^{{.DOCKER_USERNAME}}/{{.DOCKER_REPO_PREFIX}}_' | awk '{print $3}' | xargs docker rmi --force
 

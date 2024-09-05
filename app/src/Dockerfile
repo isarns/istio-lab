@@ -10,7 +10,7 @@ COPY ${APP_DIR} ./
 
 RUN go mod download
 
-COPY ${APP_DIR}/cmd/*.go ./
+COPY ${APP_DIR}/*.go ./
 
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app
