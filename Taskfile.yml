@@ -75,11 +75,26 @@ tasks:
       - task: k6:deploy-k6-operator
       - task: messages
   
-  client-logs:
-    desc: Show the client logs
+  logs-*:
+    desc: Print logs for the app with arguments [appName]
+    vars:
+      APP_NAME: '{{index .MATCH 0}}'
     cmds:
-      - kubectl -n {{.APP_NAMESPACE}} logs -l app=app-a -c app-a -f 
+      - kubectl -n {{.APP_NAMESPACE}} logs -l app={{.APP_NAME}} -f 
   
+  test-*-*-*:
+    desc: Run a test with arguments [sleep, count, scenarioLetter]
+    preconditions:
+      - sh: kubectl -n apps get deploy | grep app-a
+        msg: The deployments are not found. Please deploy the deployments to proceed.
+    vars:
+      SLEEP: '{{index .MATCH 0}}'
+      COUNT: '{{index .MATCH 1}}'
+      LETTER: '{{index .MATCH 2}}'
+    cmds:
+      - curl http://proxy.local/scenario{{.LETTER}}\?delay\={{.SLEEP}}\&requestCount\={{.COUNT}} 
+      
+
   clean:
     desc: Delete the kind cluster
     cmds:

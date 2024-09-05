@@ -5,13 +5,15 @@ vars:
 
 tasks:
   deployApps:
+    desc: Deploy Apps to Kubernetes
     preconditions: &base-preconditions
         - sh: kubectl config current-context | grep kind-{{.CLUSTER_NAME}}
           msg: kubectl context is not set to kind-{{.CLUSTER_NAME}}
     cmds:
       - kubectl -n {{.APP_NAMESPACE}} apply -k live
     
-  restartApp:
+  restartApps:
+    desc: Restart Apps 
     preconditions: *base-preconditions
     cmds:
       - kubectl -n {{.APP_NAMESPACE}} rollout restart deployment
