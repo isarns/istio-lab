@@ -49,6 +49,7 @@ If you plan to modify the custom app, you will also need:
 ![Simple Architecture](./assets/simple%20architecture.png)
 This diagram illustrates the basic architecture, showing deployments connected to an ingress (Istio Gateway).
 
+![Data Flow](./assets/kiali.gif)
 ## Scenarios
 
 ![Scenarios](./assets/Scenarios.png)
