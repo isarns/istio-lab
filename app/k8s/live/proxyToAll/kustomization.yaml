@@ -14,7 +14,7 @@ configMapGenerator:
 
 images:
   - name: change:image
-    newName: isarn/istio_circuit_breaker_demo_proxytoall
+    newName: isarn/istio_lab_proxytoall
     newTag: latest
 
 patches:

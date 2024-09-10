@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   DOCKER_USERNAME: isarn
-  DOCKER_REPO_PREFIX: istio_circuit_breaker_demo
+  DOCKER_REPO_PREFIX: istio_lab
 
 tasks:
   buildApps:
@@ -26,6 +26,17 @@ tasks:
         cmd: |
           repo=$(echo "{{.DOCKER_USERNAME}}/{{.DOCKER_REPO_PREFIX}}_{{.ITEM}}" | tr '[:upper:]' '[:lower:]')
           docker push $repo:latest
+  
+  pushAppsMultiArch:
+    desc: Push the apps to Docker Hub
+    vars:
+      APPS: proxyToAll appA appB appC
+    cmds:
+      - for: { var: APPS }
+        cmd: |
+          repo=$(echo "{{.DOCKER_USERNAME}}/{{.DOCKER_REPO_PREFIX}}_{{.ITEM}}" | tr '[:upper:]' '[:lower:]')
+          docker buildx create --name multy-arch --use || docker buildx use multy-arch
+          docker buildx build --build-arg APP_DIR={{.ITEM}} --build-arg PORT=8080 --platform linux/amd64,linux/arm64 -t $repo:latest --push .
   
   deleteImagesForcefully:
     desc: Delete all images forcefully

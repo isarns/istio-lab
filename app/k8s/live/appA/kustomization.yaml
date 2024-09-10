@@ -13,7 +13,7 @@ configMapGenerator:
 
 images:
   - name: change:image
-    newName: isarn/istio_circuit_breaker_demo_appa
+    newName: isarn/istio_lab_appa
     newTag: latest
 
 patches:
