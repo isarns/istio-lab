@@ -1,3 +1,4 @@
 **/charts/
 k6/k6-operator
 vendor
+.DS_Store
